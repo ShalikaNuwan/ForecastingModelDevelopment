@@ -1,11 +1,9 @@
 import os
-import pandas as pd
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import MinMaxScaler
-
-data = pd.read_excel('DemandForecasting/data/DemandData.xlsx')
 
 #extract the datetime features to analyze the correlation
 def datetimeFeatures(df):
@@ -17,8 +15,6 @@ def datetimeFeatures(df):
     df['is_weekend'] = df['is_weekend'].astype(int)
     
     return df
-
-data = datetimeFeatures(data)
 
 def plotHeatMap(df):
     corr = df.corr()
@@ -33,14 +29,49 @@ def plotHeatMap(df):
     plt.savefig(save_path)
     plt.close()
     print(f"Heatmap saved to: {save_path}")
-    
-plotHeatMap(data)
 
-def dataPreprocessing(df):
+def dataNormalizer(df):
     scaler = MinMaxScaler()
     df['redistributed'] = scaler.fit_transform(df[['redistributed']])
-    return data
+    return df,scaler
 
-data = dataPreprocessing(data)
+def dataSequence(df,window_size, step_size, forecast_horizon):
+    demand = df['redistributed'].values
+    num_samples = len(demand)
+    X = []
+    y = []
+
+    for start in range(0, num_samples - window_size - forecast_horizon + 1, step_size):
+        end = start + window_size
+        forecast_end = end + forecast_horizon
+        window_dem = demand[start:end-1]
+        X.append([window_dem])
+        y.append(demand[end-1:forecast_end-1])  
+
+    return np.array(X), np.array(y)
 
 
+def plotTrainTestLoss(history,modelName):
+    plt.figure(figsize=(10, 6))
+    plt.plot(history.history['loss'], label='Train Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Model Loss Over Epochs')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid(True)
+
+    os.makedirs(modelName, exist_ok=True)
+    plot_path = os.path.join(modelName, 'loss_plot.png')
+    plt.savefig(plot_path)
+    plt.show()
+
+data = pd.read_excel('DemandForecasting/data/DemandData.xlsx')
+data = datetimeFeatures(data)
+data,scaler = dataNormalizer(data)
+x,y = dataSequence(data,25,1,1)
+
+#make the train, val and test data
+
+x_train,x_val,x_test = x[:int(len(x)*0.8)],x[int(len(x)*0.8):int(len(x)*0.9)],x[int(len(x)*0.9):]
+y_train,y_val,y_test = y[:int(len(x)*0.8)],y[int(len(x)*0.8):int(len(x)*0.9)],y[int(len(x)*0.9):]
