@@ -50,6 +50,7 @@ def dataSequence(df,window_size, step_size, forecast_horizon):
 
     return np.array(X), np.array(y)
 
+current_file_dir = os.path.dirname(os.path.abspath(__file__))
 
 def plotTrainTestLoss(history,modelName):
     plt.figure(figsize=(10, 6))
@@ -61,15 +62,16 @@ def plotTrainTestLoss(history,modelName):
     plt.legend()
     plt.grid(True)
 
-    os.makedirs(modelName, exist_ok=True)
-    plot_path = os.path.join(modelName, 'loss_plot.png')
+    plot_path = os.path.join(current_file_dir, f'plots/{modelName}')
+    os.makedirs(plot_path, exist_ok=True)
+    plot_path = os.path.join(current_file_dir, f'plots/{modelName}/TrainAndTestloss.png')
     plt.savefig(plot_path)
     plt.show()
 
 data = pd.read_excel('DemandForecasting/data/DemandData.xlsx')
 data = datetimeFeatures(data)
 data,scaler = dataNormalizer(data)
-x,y = dataSequence(data,25,1,1)
+x,y = dataSequence(data,49,1,1)
 
 #make the train, val and test data
 
