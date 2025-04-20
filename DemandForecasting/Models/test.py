@@ -3,9 +3,9 @@ from sklearn.metrics import mean_absolute_error,mean_absolute_percentage_error,r
 from DataLoader import y_test,x_test,scaler
 from keras.models import load_model
 import matplotlib.pyplot as plt
+import random
 
-
-model = load_model('/Users/shalikanuwan/Documents/Academics/FYP/ForecastingModelDevelopment/demandModel1/ 10- 0.0017.ckpt')
+model = load_model('/Users/shalikanuwan/Documents/Academics/FYP/ForecastingModelDevelopment/demandModel248Seq1/ 4- 0.0016.ckpt')
 
 pred = model.predict(x_test).flatten()
 pred_ns = scaler.inverse_transform([pred]).flatten()
@@ -20,17 +20,21 @@ print("MAE :" + str(mae))
 print("R2 :" + str(r2))
 print("MAPE :" + str(mape))
 
-#data visaulization
+current_file_dir = os.path.dirname(os.path.abspath(__file__))
 
-plt.figure(figsize=(15,5))
-plt.plot(pred_ns,label = 'Predictions')
-plt.plot(scaler.inverse_transform(y_test).flatten(),label = 'Actual')
-plt.title('Model evaluaton for Solar Generation')
-plt.legend(loc='lower center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol=2)
-os.makedirs('demandModel1', exist_ok=True)
-plot_path = os.path.join('demandModel1', 'loss_plot.png')
-plt.savefig(plot_path)
-plt.savefig(plot_path)
-plt.show()
+# data visaulization
+for i in range(5):
+    idx = random.randint(0,3460)
+    plt.figure(figsize=(15,5))
+    plt.plot(pred_ns[idx:idx+24],label = 'Predictions')
+    plt.plot(scaler.inverse_transform(y_test).flatten()[idx:idx+24],label = 'Actual')
+    plt.title('Model evaluaton for demand forecasting')
+    plt.legend()
+    plot_path = os.path.join(current_file_dir, f'plots/demandModel248Seq1')
+    os.makedirs(plot_path, exist_ok=True)
+    plot_path = os.path.join(current_file_dir, f'plots/demandModel248Seq1/loss_plot{i}.png')
+    plt.savefig(plot_path)
+    plt.savefig(plot_path)
+    plt.show()
 
 

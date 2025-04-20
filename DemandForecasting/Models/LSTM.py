@@ -19,7 +19,7 @@ def build_model(shape):
     d_model = input_shape[1]
     pos_enc = positional_encoding(input_shape[0], d_model)
     inputs_pos_enc = inputs + pos_enc
-    lstm_out = Bidirectional(LSTM(256, return_sequences=True))(inputs_pos_enc)
+    lstm_out = Bidirectional(LSTM(64, return_sequences=True))(inputs_pos_enc)
 
     # Multi-Head Self-Attention mechanism
     attention_out, attention_scores = MultiHeadAttention(num_heads=4, key_dim=64)(lstm_out, lstm_out, return_attention_scores=True)
